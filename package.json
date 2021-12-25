@@ -1,0 +1,37 @@
+{
+  "name": "electron-vue-event-manager",
+  "version": "0.0.1",
+  "description": "跨 Vue 组件及跨 electron 窗口的事件监听管理器",
+  "author": "imba97",
+  "scripts": {
+    "dev": "tsc -w",
+    "build": "tsc"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "electron": "^13.0.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.178",
+    "@types/node": "^17.0.4",
+    "@typescript-eslint/eslint-plugin": "^5.8.0",
+    "@typescript-eslint/parser": "^5.8.0",
+    "eslint": "^8.5.0",
+    "typescript": "^4.5.4"
+  },
+  "bugs": {
+    "url": "https://github.com/imba97/electron-vue-event-manager/issues"
+  },
+  "homepage": "https://github.com/imba97/electron-vue-event-manager#readme",
+  "keywords": [
+    "electron-vue",
+    "event"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/imba97/electron-vue-event-manager.git"
+  }
+}
