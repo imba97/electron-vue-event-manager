@@ -7,7 +7,7 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 
-import EventManager from '../../electron-vue-event-manager'
+import EventManager from 'electron-vue-event-manager'
 import { EventType } from '@/base/Event/EventEnum'
 
 // 初始化事件监听

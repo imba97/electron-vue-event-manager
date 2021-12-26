@@ -1,7 +1,10 @@
 <template>
   <div id="app">
-    <input type="text" v-model="message" />
-    <button @click="sendToWindow2">向窗口2发送消息</button>
+    <div v-if="!window2Closed">
+      <input type="text" v-model="message" />
+      <button @click="sendToWindow2">向窗口2发送消息</button>
+    </div>
+    <div v-else>窗口2 已关闭</div>
 
     <h1>组件之间的传递</h1>
     <div class="component-container">
@@ -14,11 +17,11 @@
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 
-import EventManager from '../../electron-vue-event-manager'
+import EventManager from 'electron-vue-event-manager'
 import { EventType } from './base/Event/EventEnum'
 
-import Component1 from '@/components/Component1.vue';
-import Component2 from '@/components/Component2.vue';
+import Component1 from '@/components/Component1.vue'
+import Component2 from '@/components/Component2.vue'
 
 // 初始化事件监听
 EventManager.Instance().rendererInit()
@@ -30,12 +33,14 @@ EventManager.Instance().rendererInit()
   }
 })
 export default class Window1 extends Vue {
+
+  window2Closed = false
+
   message = ''
 
   created() {
-    // 监听 窗口1发送消息 事件
-    EventManager.Instance().addEventListener<string>(EventType.Window1SendMessage, (window2Message) => {
-      console.log('window2: ', window2Message)
+    EventManager.Instance().addEventListener(EventType.Window2BeforeClose, () => {
+      this.window2Closed = true
     })
   }
 

@@ -5,7 +5,8 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-import EventManager from '../../electron-vue-event-manager'
+import EventManager from 'electron-vue-event-manager'
+import { EventType } from './base/Event/EventEnum'
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -21,6 +22,7 @@ async function createWindow() {
     y: 0,
     width: width,
     height: height,
+    title: 'Window1',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -32,6 +34,7 @@ async function createWindow() {
     y: screen.getPrimaryDisplay().workAreaSize.height - height,
     width: width,
     height: height,
+    title: 'Window2',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -50,6 +53,10 @@ async function createWindow() {
       type: 'window2'
     }
   ])
+
+  window2.on('close', () => {
+    EventManager.Instance().broadcast(EventType.Window2BeforeClose)
+  })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode

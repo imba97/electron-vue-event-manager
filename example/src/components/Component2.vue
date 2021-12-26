@@ -11,17 +11,17 @@
 </template>
 
 <script lang="ts">
-import { CustomTest } from '@/base/Custom/CustomInterface';
-import { EventType } from '@/base/Event/EventEnum';
-import { Component, Vue } from 'vue-property-decorator';
-import EventManager from '../../../electron-vue-event-manager/dist';
+import { IPerson } from '@/base/Custom/CustomInterface'
+import { EventType } from '@/base/Event/EventEnum'
+import { Component, Vue } from 'vue-property-decorator'
+import EventManager from 'electron-vue-event-manager'
 
 @Component
 export default class Component2 extends Vue {
   name = '张三'
 
   sendToComponent1() {
-    EventManager.Instance().broadcast<CustomTest>(EventType.Component2SendMessage, {
+    EventManager.Instance().broadcast<IPerson>(EventType.Component2SendMessage, {
       name: this.name,
       age: 18
     })

@@ -12,10 +12,10 @@
 </template>
 
 <script lang="ts">
-import { CustomTest as IPerson } from '@/base/Custom/CustomInterface';
-import { EventType } from '@/base/Event/EventEnum';
-import { Component, Vue } from 'vue-property-decorator';
-import EventManager from '../../../electron-vue-event-manager/dist';
+import { IPerson } from '@/base/Custom/CustomInterface'
+import { EventType } from '@/base/Event/EventEnum'
+import { Component, Vue } from 'vue-property-decorator'
+import EventManager from 'electron-vue-event-manager'
 
 @Component
 export default class Component1 extends Vue {
