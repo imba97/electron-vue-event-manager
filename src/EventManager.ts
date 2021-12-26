@@ -1,7 +1,7 @@
 import { ipcMain, ipcRenderer } from 'electron'
 import SingletonBase from './base/Singleton'
 
-import { EventManagerType, EventType, MainEventType } from './EventEnum'
+import { EventType, MainEventType } from './EventEnum'
 import {
   Callback,
   Callback1,
@@ -23,18 +23,15 @@ const IS_MAIN = ipcMain !== undefined
 export default class EventManager extends SingletonBase {
   private _listener: Map<EventType, EventFunction[]> = new Map()
 
+  private _windows: IBrowserWindow[] = []
+
   public mainInit(windows: IBrowserWindow[]) {
+    this._windows = windows
+
     ipcMain.on(
       MainEventType.ExecuteOtherWindowsListener,
       (_event, type: EventType, ...args) => {
-        _.forEach(windows, (item) => {
-          item.window.webContents.send(
-            MainEventType.ExecuteOtherWindowsListener,
-            item.type,
-            type,
-            ...args
-          )
-        })
+        this._executeMain(type, ...args)
       }
     )
   }
@@ -188,9 +185,11 @@ export default class EventManager extends SingletonBase {
     // 执行自己的监听器
     this._execute(type, false, ...args)
 
-    // 不是主线程
-    if (!IS_MAIN) {
-      //
+    // 是主线程则向其他渲染线程发送消息
+    if (IS_MAIN) {
+      this._executeMain(type, ...args)
+    } else {
+      // 是渲染线程则让渲染线程通过主线程转发到其他渲染线程
       ipcRenderer.send(MainEventType.ExecuteOtherWindowsListener, type, ...args)
     }
   }
@@ -209,5 +208,17 @@ export default class EventManager extends SingletonBase {
     if (!IS_MAIN && !isMainSend) {
       ipcRenderer.send(type, ...args)
     }
+  }
+
+  private _executeMain(type: EventType, ...args: any[]) {
+    console.log(type, 'executeMain')
+    _.forEach(this._windows, (item) => {
+      item.window.webContents.send(
+        MainEventType.ExecuteOtherWindowsListener,
+        item.type,
+        type,
+        ...args
+      )
+    })
   }
 }

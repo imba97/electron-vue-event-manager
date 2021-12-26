@@ -10,7 +10,7 @@
 2. `electron` 主线程与渲染线程的消息传递
 3. `electron` 窗口之间的消息传递
 
-## 导入 `electron-vue-event-manager`
+## 导入
 
 ```typescript
 import EventManager from 'electron-vue-event-manager'
@@ -51,7 +51,7 @@ EventManager.Instance().rendererInit()
 
 # 监听
 
-在任何位置添加监听器，即可监听来自主线程或其他窗口发送的消息
+在任何位置添加监听器，即可监听来自任何地方的广播消息
 
 ```typescript
 // Window1 添加监听事件
