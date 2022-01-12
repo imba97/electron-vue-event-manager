@@ -1,4 +1,4 @@
-import { ipcMain, ipcRenderer } from 'electron'
+import { app, ipcMain, ipcRenderer } from 'electron'
 import SingletonBase from './base/Singleton'
 
 import { EventType, MainEventType } from './EventEnum'
@@ -13,6 +13,8 @@ import {
 import _ from 'lodash'
 import { IBrowserWindow } from './EventInterface'
 
+import axios, { AxiosPromise, AxiosRequestConfig } from 'axios'
+
 type EventFunction = (...args: any[]) => any
 
 /**
@@ -22,16 +24,34 @@ const IS_MAIN = ipcMain !== undefined
 
 export default class EventManager extends SingletonBase {
   private _listener: Map<EventType, EventFunction[]> = new Map()
+  private _networkListener: Map<
+    number,
+    { resolve: (arg: any) => void; reject: (arg: any) => void }
+  > = new Map()
 
   private _windows: IBrowserWindow[] = []
 
   public mainInit(windows: IBrowserWindow[]) {
     this._windows = windows
 
+    app.on('will-quit', () => {
+      ;(this as any).instance = null
+    })
+
     ipcMain.on(
       MainEventType.ExecuteOtherWindowsListener,
       (_event, type: EventType, ...args) => {
         this._executeMain(type, ...args)
+      }
+    )
+
+    ipcMain.on(
+      MainEventType.NetworkRequest,
+      (event, id: number, options: AxiosRequestConfig) => {
+        console.log('网络请求')
+        axios(options).then((response) => {
+          event.sender.send(MainEventType.NetworkResponse, id, response.data)
+        })
       }
     )
   }
@@ -44,6 +64,36 @@ export default class EventManager extends SingletonBase {
         this._execute(type, true, ...args)
       }
     )
+
+    ipcRenderer.on(
+      MainEventType.NetworkResponse,
+      (_, id: number, response: any) => {
+        const promise = this._networkListener.get(id)
+        promise.resolve(response)
+        this._networkListener.delete(id)
+        // TODO: 异常处理
+      }
+    )
+  }
+
+  /**
+   * 发送网络请求
+   * @param options
+   */
+  public sendRequest(options: AxiosRequestConfig<any>): Promise<any> {
+    return new Promise((resolve, reject) => {
+      console.log('sendRequest', options)
+      const id = _.random(0, 99999999)
+      // TODO: id 用随机字符+时间戳
+      if (!this._networkListener.has(id)) {
+        this._networkListener.set(id, {
+          resolve,
+          reject
+        })
+      }
+
+      ipcRenderer.send(MainEventType.NetworkRequest, id, options)
+    })
   }
 
   private _addEventListener(type: EventType, cb: EventFunction) {

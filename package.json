@@ -1,6 +1,6 @@
 {
   "name": "electron-vue-event-manager",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "跨 Vue 组件及跨 electron 窗口的事件监听管理器",
   "author": "imba97",
   "scripts": {
@@ -10,6 +10,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
+    "axios": "^0.24.0",
     "electron": "^13.0.0",
     "lodash": "^4.17.21"
   },
