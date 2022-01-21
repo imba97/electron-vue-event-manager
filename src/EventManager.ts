@@ -38,6 +38,7 @@ export default class EventManager extends SingletonBase {
       ;(this as any).instance = null
     })
 
+    // 在其他窗口执行事件回调
     ipcMain.on(
       MainEventType.ExecuteOtherWindowsListener,
       (_event, type: EventType, ...args) => {
@@ -45,10 +46,11 @@ export default class EventManager extends SingletonBase {
       }
     )
 
+    // 网络请求封装
     ipcMain.on(
       MainEventType.NetworkRequest,
       (event, id: number, options: AxiosRequestConfig) => {
-        console.log('网络请求')
+        console.log('网络请求', options)
         axios(options).then((response) => {
           event.sender.send(MainEventType.NetworkResponse, id, response.data)
         })
@@ -78,11 +80,21 @@ export default class EventManager extends SingletonBase {
 
   /**
    * 发送网络请求
-   * @param options
+   * @param options 参数
    */
   public sendRequest(options: AxiosRequestConfig<any>): Promise<any> {
     return new Promise((resolve, reject) => {
       console.log('sendRequest', options)
+
+      if (IS_MAIN) {
+        axios(options)
+          .then((response) => {
+            resolve(response.data)
+          })
+          .catch(reject)
+        return
+      }
+
       const id = _.random(0, 99999999)
       // TODO: id 用随机字符+时间戳
       if (!this._networkListener.has(id)) {
@@ -138,6 +150,11 @@ export default class EventManager extends SingletonBase {
     }
   }
 
+  /**
+   * 添加事件监听器
+   * @param type 事件类型
+   * @param cb 回调函数
+   */
   public addEventListener(type: EventType, cb: Callback): void
   public addEventListener<Arg1>(type: EventType, cb: Callback1<Arg1>): void
   public addEventListener<Arg1, Arg2>(
@@ -159,6 +176,11 @@ export default class EventManager extends SingletonBase {
     this._addEventListener(type, cb)
   }
 
+  /**
+   * 移除事件监听器
+   * @param type 事件类型
+   * @param cb 回调函数
+   */
   public removeEventListener(type: EventType, cb: Callback): void
   public removeEventListener<Arg1>(type: EventType, cb: Callback1<Arg1>): void
   public removeEventListener<Arg1, Arg2>(
@@ -180,6 +202,15 @@ export default class EventManager extends SingletonBase {
     this._removeEventListener(type, cb)
   }
 
+  /**
+   * 事件广播
+   * @param type 事件类型
+   * @param arg1 参数 1
+   * @param arg2 参数 2
+   * @param arg3 参数 3
+   * @param arg4 参数 4
+   * @param arg5 参数 5
+   */
   public broadcast(
     type: EventType,
     arg1?: undefined,
@@ -244,6 +275,12 @@ export default class EventManager extends SingletonBase {
     }
   }
 
+  /**
+   * 执行渲染进程回调
+   * @param type 事件类型
+   * @param isMainSend 是否是主线程发送
+   * @param args 参数
+   */
   private _execute(type: EventType, isMainSend: boolean, ...args: any[]) {
     console.log(type, 'execute')
 
@@ -260,6 +297,11 @@ export default class EventManager extends SingletonBase {
     }
   }
 
+  /**
+   * 执行主进程回调
+   * @param type 事件类型
+   * @param args 参数
+   */
   private _executeMain(type: EventType, ...args: any[]) {
     console.log(type, 'executeMain')
     _.forEach(this._windows, (item) => {
