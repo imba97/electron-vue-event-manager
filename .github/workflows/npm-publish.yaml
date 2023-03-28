@@ -16,7 +16,9 @@ jobs:
           registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies 📦️
-        run: npm install
+        run: |
+          npm install
+          npm install -S electron@13.0.0
 
       - name: build
         run: npm run build
